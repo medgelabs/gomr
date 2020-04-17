@@ -1,0 +1,2 @@
+# gomr
+Game of Go
