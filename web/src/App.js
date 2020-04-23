@@ -12,6 +12,7 @@ class App extends React.Component {
       cellSize: 40,
       padding: 10,
       gutter: 50, // gutter around grid
+      stoneRadius: 15,
     }
 
     // calculate total grid size
@@ -44,6 +45,7 @@ class App extends React.Component {
 
     ctx.strokeStyle = "black"
     ctx.stroke()
+    this.drawStone(30, 40, "black")
   }
 
   render() {
@@ -55,6 +57,16 @@ class App extends React.Component {
         </main>
       </div>
     )
+  }
+
+  drawStone(xCoord, yCoord, color) {
+    const ctx = this.refs.canvas.getContext("2d")
+    ctx.moveTo(xCoord + this.state.stoneRadius, yCoord)
+    ctx.arc(xCoord, yCoord, this.state.stoneRadius, 0, 2 * Math.PI, false)
+
+    ctx.fillStyle = color
+    ctx.fill()
+    ctx.stroke()
   }
 }
 
