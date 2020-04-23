@@ -14,7 +14,7 @@ const gameLoop = (canvasRef) => {
     const xCoord = Math.round((x - config.padding) / config.cellSize)
     const yCoord = Math.round((y - config.padding) / config.cellSize)
 
-    canvasRef.current.getContext("2d").clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+    // canvasRef.current.getContext("2d").clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
     const opacityBlack = "rgba(0, 0, 0, 0.5)"
     const opacityWhite = "rgba(255, 255, 255, 0.5)"

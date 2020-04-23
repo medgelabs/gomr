@@ -23,6 +23,18 @@ const drawBoard = (canvasRef, state) => {
   ctx.stroke()
 }
 
+/**
+ * Places a stone at the specified grid coordinate. These coordinates
+ * would be the index of the intersection that you want to place the stone
+ * at *not* the pixel coordinates.
+ *
+ * The grid system has the origin at the top left of the board. Positive x
+ * is to the right and positive y is down.
+ *
+ * @param {Number} xCoord the x coord to place the stone at
+ * @param {Number} yCoord the y coord to place the stone at
+ * @param {String} color the string value for the color of the stone
+ */
 const drawStone = (canvasRef, xCoord, yCoord, color, state) => {
   // translate to board intersections
   const x = xCoord * state.cellSize + state.padding
