@@ -1,23 +1,12 @@
 import React, { useState, useEffect, useRef } from "react"
 
 import Header from "./header/Header"
+import { gameLoop } from "./gameLoop"
 import "./App.css"
 
 const App = () => {
   useEffect(() => {
-    updateCanvas()
-    canvasRef.current.addEventListener("mousemove", (event) => {
-      const rect = canvas.getBoundingClientRect()
-      let x = event.clientX - rect.left
-      let y = event.clientY - rect.top
-
-      const xCoord = Math.round((x - state.padding) / state.cellSize)
-      const yCoord = Math.round((y - state.padding) / state.cellSize)
-
-      canvasRef.current.getContext("2d").clearRect(0, 0, canvasWidth, canvasHeight)
-      updateCanvas()
-      drawStone(xCoord, yCoord, "rgba(255, 255, 255, 0.5)")
-    })
+    gameLoop(canvasRef)
   })
 
   const canvasRef = useRef(null)
@@ -98,16 +87,6 @@ const App = () => {
     drawStone(5, 8, "black")
     drawStone(11, 19, "black")
     drawStone(14, 18, "black")
-
-    canvas.addEventListener("mousedown", (event) => {
-      const rect = canvas.getBoundingClientRect()
-      let x = event.clientX - rect.left
-      let y = event.clientY - rect.top
-
-      const xCoord = (x - state.padding) / state.cellSize
-      const yCoord = (y - state.padding) / state.cellSize
-      drawStone(Math.round(xCoord), Math.round(yCoord), "white")
-    })
   }
 
   return (
