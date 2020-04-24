@@ -1,4 +1,6 @@
-const drawBoard = (canvasRef, state) => {
+import { config } from "./config"
+
+const drawBoard = (canvasRef) => {
   const ctx = canvasRef.current.getContext("2d")
   const canvas = canvasRef.current
 
@@ -6,19 +8,19 @@ const drawBoard = (canvasRef, state) => {
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   ctx.beginPath()
-  const bw = state.numCells * state.cellSize
-  const bh = state.numCells * state.cellSize
-  const p = state.padding
-  const cellSize = state.cellSize
+  const bw = config.numCells * config.cellSize
+  const bh = config.numCells * config.cellSize
+  const p = config.padding
+  const cellSize = config.cellSize
 
   for (var x = 0; x <= bw; x += cellSize) {
-    ctx.moveTo(0.5 + x + p, p)
-    ctx.lineTo(0.5 + x + p, bh + p)
+    ctx.moveTo(config.xOffset + x + p, config.yOffset + p)
+    ctx.lineTo(config.xOffset + x + p, config.yOffset + bh + p)
   }
 
   for (var x = 0; x <= bh; x += cellSize) {
-    ctx.moveTo(p, 0.5 + x + p)
-    ctx.lineTo(bw + p, 0.5 + x + p)
+    ctx.moveTo(config.xOffset + p, config.yOffset + x + p)
+    ctx.lineTo(config.xOffset + bw + p, config.yOffset + x + p)
   }
   ctx.stroke()
 }
@@ -35,10 +37,10 @@ const drawBoard = (canvasRef, state) => {
  * @param {Number} yCoord the y coord to place the stone at
  * @param {String} color the string value for the color of the stone
  */
-const drawStone = (canvasRef, xCoord, yCoord, color, state) => {
+const drawStone = (canvasRef, xCoord, yCoord, color) => {
   // translate to board intersections
-  const x = xCoord * state.cellSize + state.padding
-  const y = yCoord * state.cellSize + state.padding
+  const x = xCoord * config.cellSize + config.padding
+  const y = yCoord * config.cellSize + config.padding
 
   // get the canvas ref
   const ctx = canvasRef.current.getContext("2d")
@@ -48,10 +50,10 @@ const drawStone = (canvasRef, xCoord, yCoord, color, state) => {
   // you have to add the radius here because it moves the canvas
   // cursor to the middle of the circle otherwise and you get strange
   // looking white stones.
-  ctx.moveTo(x + state.stoneRadius, y)
+  ctx.moveTo(config.xOffset + x + config.stoneRadius, config.yOffset + y)
 
   // draw the arc
-  ctx.arc(x, y, state.stoneRadius, 0, 2 * Math.PI, false)
+  ctx.arc(config.xOffset + x, config.yOffset + y, config.stoneRadius, 0, 2 * Math.PI, false)
 
   ctx.fillStyle = color
   ctx.fill()

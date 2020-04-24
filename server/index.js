@@ -3,6 +3,9 @@ const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8081, clientTracking: true });
 
 var connectionCount = 0;
+
+// Instead of polling, use a promise to wait for 
+// two connections to occur then resolve and implement your server code
 new Promise((resolve) => {
   wss.on('connection', function connection(ws) {
     console.log("connection")
