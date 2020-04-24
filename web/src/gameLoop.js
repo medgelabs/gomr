@@ -10,7 +10,6 @@ const gameLoop = (canvasRef, gameState, color, sendMove) => {
 
     const xCoord = Math.round((x - config.padding - config.xOffset) / config.cellSize)
     const yCoord = Math.round((y - config.padding - config.yOffset) / config.cellSize)
-
     const opacityBlack = "rgba(0, 0, 0, 0.5)"
     const opacityWhite = "rgba(255, 255, 255, 0.5)"
 

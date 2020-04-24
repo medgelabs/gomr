@@ -30,14 +30,6 @@ const App = () => {
 
   const canvasRef = useRef(null)
 
-  const state = {
-    numCells: 19,
-    cellSize: 40,
-    padding: 10,
-    gutter: 50, // gutter around grid
-    stoneRadius: 15,
-  }
-
   const canvasWidth = config.numCells * config.cellSize + config.gutter
   const canvasHeight = config.numCells * config.cellSize + config.gutter
 
