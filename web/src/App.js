@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react"
 
 import Header from "./header/Header"
 import { gameLoop } from "./gameLoop"
+import { config } from "./config"
 import "./App.css"
 
 const App = () => {
@@ -19,15 +20,18 @@ const App = () => {
     stoneRadius: 15,
   }
 
-  const canvasWidth = state.numCells * state.cellSize + state.gutter
-  const canvasHeight = state.numCells * state.cellSize + state.gutter
+  const canvasWidth = config.numCells * config.cellSize + config.gutter
+  const canvasHeight = config.numCells * config.cellSize + config.gutter
 
   return (
-    <div>
-      <Header />
-      <main style={{ display: "flex", justifyContent: "center" }}>
-        <canvas ref={canvasRef} id="canvas" width={canvasWidth} height={canvasHeight}></canvas>
-      </main>
+    <div className="main">
+      <canvas
+        style={{ alignSelf: "flex-start" }}
+        ref={canvasRef}
+        id="canvas"
+        width={canvasWidth}
+        height={canvasHeight}
+      ></canvas>
     </div>
   )
 }
