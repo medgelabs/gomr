@@ -8,6 +8,11 @@ body {
   justify-content: space-between;
 }
 
+.main {
+  display: flex;
+  justify-content: center;
+}
+
 @media (max-width: 400px) {
   .grid {
     display: block;
