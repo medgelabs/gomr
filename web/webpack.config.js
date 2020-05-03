@@ -5,6 +5,9 @@ const PrettierPlugin = require("prettier-webpack-plugin")
 
 module.exports = {
   devtool: "cheap-eval-source-map",
+  devServer: {
+    historyApiFallback: true,
+  },
   entry: {
     app: [path.join(__dirname, "src", "index.js")],
     vendors: ["react", "react-dom", "react-router"]

@@ -2,15 +2,21 @@
 
 import React from "react"
 import { render } from "react-dom"
-import { BrowserRouter as Router, Route } from "react-router-dom"
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
 
-import App from "./App"
+import Game from "./components/Game"
+import LandingPage from "./components/LandingPage"
 
 render(
   <Router>
-    <div>
-      <Route exact path="/" component={App} />
-    </div>
+    <Switch>
+      <Route exact path="/">
+        <LandingPage />
+      </Route>
+      <Route exact path="/game">
+        <Game />
+      </Route>
+    </Switch>
   </Router>,
   document.querySelector("#app")
 )

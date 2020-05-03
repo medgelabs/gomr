@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from "react"
 
-import { gameLoop } from "./gameLoop"
-import { config } from "./config"
-import "./App.css"
+import { gameLoop } from "../utils/gameLoop"
+import { config } from "../config"
+import "./Game.css"
 
-const App = () => {
+const Game = () => {
   const ws = new WebSocket("ws://localhost:8081")
   const color = useRef("black")
 
@@ -46,4 +46,4 @@ const App = () => {
   )
 }
 
-export default App
+export default Game

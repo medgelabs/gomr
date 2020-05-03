@@ -1,5 +1,5 @@
 import { drawStone, drawBoard } from "./drawUtils"
-import { config } from "./config"
+import { config } from "../config"
 
 const gameLoop = (canvasRef, gameState, color, sendMove) => {
   drawBoard(canvasRef)
@@ -25,8 +25,8 @@ const gameLoop = (canvasRef, gameState, color, sendMove) => {
     let x = event.clientX - rect.left
     let y = event.clientY - rect.top
 
-    const xCoord = Math.round((x - config.padding) / config.cellSize)
-    const yCoord = Math.round((y - config.padding) / config.cellSize)
+    const xCoord = Math.round((x - config.padding - config.xOffset) / config.cellSize)
+    const yCoord = Math.round((y - config.padding - config.yOffset) / config.cellSize)
 
     gameState.current.push([xCoord, yCoord, color.current])
     sendMove([xCoord, yCoord])
