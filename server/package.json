@@ -1,0 +1,25 @@
+{
+  "name": "gomr-backend",
+  "version": "1.0.0",
+  "description": "Go backend server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/medgelabs/gomr.git"
+  },
+  "keywords": [
+    "go"
+  ],
+  "author": "medgelabs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/medgelabs/gomr/issues"
+  },
+  "homepage": "https://github.com/medgelabs/gomr#readme",
+  "dependencies": {
+    "ws": "^7.2.3"
+  }
+}
