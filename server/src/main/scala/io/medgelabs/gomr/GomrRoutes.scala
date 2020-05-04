@@ -33,7 +33,7 @@ object GomrRoutes {
     val dsl = new Http4sDsl[F] {}
     import dsl._
 
-    val toClient = t.subscribe(1000)//.map(msg => SomeOtherType))
+    val toClient = t.subscribe(1000)//.map(msg => SomeOtherType)
 
     HttpRoutes.of[F] {
       // Endpoint to promote to WS connection
