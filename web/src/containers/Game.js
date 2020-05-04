@@ -8,11 +8,16 @@ const GameContainer = () => {
   const queryMap = queryString.parse(history.location.search)
   const ws = new WebSocket(queryMap.serverUrl)
 
+  var gameStart = false;
+
   
   // attempt to join the game
   ws.onopen = () => ws.send(JSON.stringify({ messageType: "joinRoom", roomId: queryMap.roomId }))
+  ws.onmessage () => 
 
-  return <></>
+  return <>
+
+  </>
 }
 
 export default GameContainer;
