@@ -1,32 +1,28 @@
-import React, { useEffect, useRef } from "react"
-
+import React, { useRef } from "react"
 import { gameLoop } from "../utils/gameLoop"
 import { config } from "../config"
 import "./Game.css"
 
-const Game = () => {
-  const ws = new WebSocket("ws://localhost:8081")
-  const color = useRef("black")
+const Game = (ws) => {
 
-  const gameState = useRef([])
-
-  const sendMove = (move) => {
-    ws.send(Uint8Array.from(move))
+  const sendMove = (boardState) => {
+    ws.send(
+      JSON.stringify({
+        messageType: "play",
+        roomId: queryMap.roomId,
+        boardState,
+        sender: queryMap.playerId,
+      })
+    )
   }
 
   ws.onmessage = (message) => {
     if (typeof message.data === "string") {
-      color.current = message.data
+      gameLoop(canvasRef, raw.boardState, raw.color, sendMove)
     } else {
-      message.data.arrayBuffer().then((buffer) => {
-        const dataBuffer = new Uint8Array(buffer)
-        gameState.current.push([dataBuffer[0], dataBuffer[1], color.current === "black" ? "white" : "black"])
-      })
+      console.log("Could not understand socket message")
     }
   }
-  useEffect(() => {
-    gameLoop(canvasRef, gameState, color, sendMove)
-  })
 
   const canvasRef = useRef(null)
 
