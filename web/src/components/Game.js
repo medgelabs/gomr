@@ -1,9 +1,16 @@
 import React, { useRef } from "react"
 import { gameLoop } from "../utils/gameLoop"
+import { useHistory } from "react-router-dom"
+import queryString from "query-string"
 import { config } from "../config"
 import "./Game.css"
 
-const Game = (ws) => {
+const Game = () => {
+  const history = useHistory()
+  const queryMap = queryString.parse(history.location.search)
+  const ws = new WebSocket(queryMap.serverUrl)
+
+  ws.onopen = () => ws.send(JSON.stringify({ messageType: "joinRoom", roomId: queryMap.roomId }))
 
   const sendMove = (boardState) => {
     ws.send(
@@ -18,6 +25,7 @@ const Game = (ws) => {
 
   ws.onmessage = (message) => {
     if (typeof message.data === "string") {
+      const raw = JSON.parse(message.data)
       gameLoop(canvasRef, raw.boardState, raw.color, sendMove)
     } else {
       console.log("Could not understand socket message")
