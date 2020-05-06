@@ -1,8 +1,12 @@
 import { drawStone, drawBoard } from "./drawUtils"
-import { config } from "./config"
+import { config } from "../config"
 
 const gameLoop = (canvasRef, gameState, color, sendMove) => {
+  console.log(gameState)
   drawBoard(canvasRef)
+  gameState.forEach((element) => {
+    drawStone(canvasRef, element[0], element[1], element[2])
+  })
   canvasRef.current.addEventListener("mousemove", (event) => {
     const rect = canvas.getBoundingClientRect()
     let x = event.clientX - rect.left
@@ -14,8 +18,8 @@ const gameLoop = (canvasRef, gameState, color, sendMove) => {
     const opacityWhite = "rgba(255, 255, 255, 0.5)"
 
     drawBoard(canvasRef)
-    drawStone(canvasRef, xCoord, yCoord, color.current === "black" ? opacityBlack : opacityWhite)
-    gameState.current.forEach((element) => {
+    drawStone(canvasRef, xCoord, yCoord, color === "black" ? opacityBlack : opacityWhite)
+    gameState.forEach((element) => {
       drawStone(canvasRef, element[0], element[1], element[2])
     })
   })
@@ -25,12 +29,12 @@ const gameLoop = (canvasRef, gameState, color, sendMove) => {
     let x = event.clientX - rect.left
     let y = event.clientY - rect.top
 
-    const xCoord = Math.round((x - config.padding) / config.cellSize)
-    const yCoord = Math.round((y - config.padding) / config.cellSize)
+    const xCoord = Math.round((x - config.padding - config.xOffset) / config.cellSize)
+    const yCoord = Math.round((y - config.padding - config.yOffset) / config.cellSize)
 
-    gameState.current.push([xCoord, yCoord, color.current])
-    sendMove([xCoord, yCoord])
-    drawStone(canvasRef, xCoord, yCoord, color.current)
+    gameState.push([xCoord, yCoord, color])
+    sendMove(gameState)
+    drawStone(canvasRef, xCoord, yCoord, color)
   })
 }
 
