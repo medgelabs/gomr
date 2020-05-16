@@ -1,41 +1,52 @@
-import React, { useRef } from "react"
+import React, { useRef, useEffect, useState } from "react"
 import { gameLoop } from "../utils/gameLoop"
-import { useHistory } from "react-router-dom"
-import queryString from "query-string"
+import { useParams } from "react-router-dom"
 import { config } from "../config"
 import "./Game.css"
 
+const serverUrl = "ws://localhost:8081/gomr"
+
 const Game = () => {
-  const history = useHistory()
-  const queryMap = queryString.parse(history.location.search)
-  const ws = new WebSocket(queryMap.serverUrl)
+  const canvasRef = useRef(null)
+  const canvasWidth = config.numCells * config.cellSize + config.gutter
+  const canvasHeight = config.numCells * config.cellSize + config.gutter
 
-  ws.onopen = () => ws.send(JSON.stringify({ messageType: "joinRoom", roomId: queryMap.roomId }))
+  const [board, setBoard] = useState([])
+  const [color, setColor] = useState("white")
+  const [playerId, setPlayerId] = useState("player1")
 
-  const sendMove = (boardState) => {
+  // Init the game loop
+  useEffect(() => {
+    gameLoop(canvasRef, board, color, sendMove)
+  })
+
+  let { roomId } = useParams()
+  const ws = new WebSocket(serverUrl)
+
+  // sendMove([x, y, color])
+  const sendMove = (move) => {
     ws.send(
       JSON.stringify({
         messageType: "play",
-        roomId: queryMap.roomId,
-        boardState,
-        sender: queryMap.playerId,
+        roomId: roomId,
+        move,
+        sender: playerId,
       })
     )
   }
 
-  ws.onmessage = (message) => {
-    if (typeof message.data === "string") {
-      const raw = JSON.parse(message.data)
-      gameLoop(canvasRef, raw.boardState, raw.color, sendMove)
-    } else {
-      console.log("Could not understand socket message")
+  useEffect(() => {
+    ws.onopen = () => ws.send(JSON.stringify({ messageType: "joinRoom", roomId: roomId }))
+
+    ws.onmessage = (message) => {
+      if (typeof message.data === "string") {
+        const raw = JSON.parse(message.data)
+        setBoard(raw.boardState)
+      } else {
+        console.log("Could not understand socket message")
+      }
     }
-  }
-
-  const canvasRef = useRef(null)
-
-  const canvasWidth = config.numCells * config.cellSize + config.gutter
-  const canvasHeight = config.numCells * config.cellSize + config.gutter
+  })
 
   return (
     <div className="main">
@@ -45,7 +56,7 @@ const Game = () => {
         id="canvas"
         width={canvasWidth}
         height={canvasHeight}
-      ></canvas>
+      />
     </div>
   )
 }

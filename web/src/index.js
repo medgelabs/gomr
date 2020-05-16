@@ -13,7 +13,7 @@ render(
       <Route exact path="/">
         <LandingPage />
       </Route>
-      <Route exact path="/game">
+      <Route path="/game/:roomId">
         <Game />
       </Route>
     </Switch>
