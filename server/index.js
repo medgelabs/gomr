@@ -31,7 +31,7 @@ const rooms = new Map();
  * to request the game.
  */
 app.post("/game", (_, res) => {
-  const roomId = uuidv4();
+  const roomId = uuidv4().replace(/-/g, "");
   const expiration = new Date();
   expiration.setDate(expiration.getDate() + 1); // JS date object automatically increments year/month appropriately.
 
@@ -44,7 +44,6 @@ app.post("/game", (_, res) => {
   });
 
   res.send({
-    url: "ws://localhost:8081/gomr",
     roomId,
     expiration,
   });
@@ -66,8 +65,8 @@ wss.on("connection", (sock, _) => {
 
     // { messageType: 'joinRoom', roomId }
     if (data.messageType === "joinRoom") {
-      // fetch first available room
       const room = rooms.get(data.roomId);
+
       if (room && !room.player1) {
         room.player1 = sock;
         console.log("first player");

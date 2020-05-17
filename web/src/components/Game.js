@@ -12,7 +12,7 @@ const Game = () => {
   const canvasHeight = config.numCells * config.cellSize + config.gutter
 
   const [board, setBoard] = useState([])
-  const [color, setColor] = useState("white")
+  const [color, setColor] = useState("")
   const [playerId, setPlayerId] = useState("player1")
 
   // Init the game loop
@@ -42,6 +42,8 @@ const Game = () => {
       if (typeof message.data === "string") {
         const raw = JSON.parse(message.data)
         setBoard(raw.boardState)
+        setColor(raw.color)
+        // setPlayerId(raw.playerId)
       } else {
         console.log("Could not understand socket message")
       }

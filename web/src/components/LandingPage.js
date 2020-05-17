@@ -11,7 +11,7 @@ const LandingPage = () => {
       .post("http://localhost:3000/game")
       .then((success) => {
         console.log(success)
-        history.push(`/game/${success.data.roomId}/player1`)
+        history.push(`/game/${success.data.roomId}`)
       })
       .catch((err) => {
         console.log("could not create new game: " + err)
