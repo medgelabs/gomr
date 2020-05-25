@@ -32,4 +32,18 @@ const isOnBoard = (index) =>
     && Math.abs(index[0]) === index[0]
     && Math.abs(index[1]) === index[1]
 
-const getValidNeighbors;
+const getValidNeighbors = (flattenedCoords) => { 
+    const coords = unflatten(flattenedCoords);
+    const possibleNeighbors = [
+        [coords[0] + 1, coords[1]],
+        [coords[0] - 1, coords[1]],
+        [coords[0], coords[1] + 1],
+        [coords[0], coords[1] - 1]
+    ];
+
+    return possibleNeighbors.filter(isOnBoard).map(flatten);
+}
+
+console.log(getValidNeighbors(0));
+console.log(getValidNeighbors(1));
+console.log(getValidNeighbors(20));
