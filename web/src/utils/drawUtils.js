@@ -1,4 +1,5 @@
 import { config } from "../config"
+import { unflatten } from "../logic/gameLogic"
 
 const drawBoard = (canvasRef) => {
   const ctx = canvasRef.current.getContext("2d")
@@ -8,8 +9,8 @@ const drawBoard = (canvasRef) => {
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   ctx.beginPath()
-  const bw = config.numCells * config.cellSize
-  const bh = config.numCells * config.cellSize
+  const bw = (config.numCells - 1) * config.cellSize
+  const bh = (config.numCells - 1) * config.cellSize
   const p = config.padding
   const cellSize = config.cellSize
 
@@ -60,4 +61,15 @@ const drawStone = (canvasRef, xCoord, yCoord, color) => {
   ctx.stroke()
 }
 
-export { drawStone, drawBoard }
+const drawStones = (canvasRef, board) => {
+  for (var i = 0; i < board.current.length; i += 1) {
+    const coords = unflatten(i)
+    if (board.current[i] === "X") {
+      drawStone(canvasRef, coords[0], coords[1], "black")
+    } else if (board.current[i] === "O") {
+      drawStone(canvasRef, coords[0], coords[1], "white")
+    }
+  }
+}
+
+export { drawStone, drawBoard, drawStones }

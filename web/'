@@ -14,7 +14,7 @@ const Game = () => {
   //  const [board, setBoard] = useState(".".repeat(Math.pow(config.numCells, 2)))
   const board = useRef(".".repeat(Math.pow(config.numCells, 2)))
   const color = useRef("")
-  const playerId = useRef("player1")
+  const [playerId, setPlayerId] = useState("player1")
 
   // Init the game loop
   useEffect(() => {
@@ -32,7 +32,7 @@ const Game = () => {
         messageType: "play",
         roomId: roomId,
         move,
-        sender: playerId.current,
+        sender: playerId,
       })
     )
   }
@@ -47,7 +47,6 @@ const Game = () => {
         // setBoard(raw.boardState)
         board.current = raw.boardState
         color.current = raw.color
-        playerId.current = raw.playerId
         // setPlayerId(raw.playerId)
       } else {
         console.log("Could not understand socket message")

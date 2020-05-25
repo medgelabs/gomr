@@ -1,19 +1,11 @@
-import { drawStone, drawBoard } from "./drawUtils"
+import { drawStone, drawBoard, drawStones } from "./drawUtils"
 import { config } from "../config"
 import { unflatten, flatten, playMove } from "../logic/gameLogic"
 
-export const gameLoop = (canvasRef, gameState, color, sendMove) => {
-  console.log(gameState)
-
+export const gameLoop = (canvasRef, board, color, sendMove) => {
   drawBoard(canvasRef)
 
-  console.log("gamestate length " + gameState.length)
-  for (var i = 0; i < gameState.length; i += 1) {
-    if (gameState[i] !== ".") {
-      const coords = unflatten(i)
-      drawStone(canvasRef, coords[0], coords[1], "black")
-    }
-  }
+  drawStones(canvasRef, board)
 
   canvasRef.current.addEventListener("mousemove", (event) => {
     const rect = canvasRef.current.getBoundingClientRect()
@@ -26,14 +18,8 @@ export const gameLoop = (canvasRef, gameState, color, sendMove) => {
     const opacityWhite = "rgba(255, 255, 255, 0.5)"
 
     drawBoard(canvasRef)
-    drawStone(canvasRef, xCoord, yCoord, color === "black" ? opacityBlack : opacityWhite)
-    for (var i = 0; i < gameState.length; i += 1) {
-      if (gameState[i] !== ".") {
-        console.log(gameState[i])
-        const coords = unflatten(i)
-        drawStone(canvasRef, coords[0], coords[1], "black")
-      }
-    }
+    drawStone(canvasRef, xCoord, yCoord, color.current === "X" ? opacityBlack : opacityWhite)
+    drawStones(canvasRef, board)
   })
 
   canvasRef.current.addEventListener("mousedown", (event) => {
@@ -44,10 +30,10 @@ export const gameLoop = (canvasRef, gameState, color, sendMove) => {
     const xCoord = Math.round((x - config.padding - config.xOffset) / config.cellSize)
     const yCoord = Math.round((y - config.padding - config.yOffset) / config.cellSize)
 
-    const move = [xCoord, yCoord, color]
+    const move = [xCoord, yCoord, color.current]
     console.log(move)
-    console.log(playMove(gameState, flatten([xCoord, yCoord]), "X"))
-    sendMove(move)
-    drawStone(canvasRef, xCoord, yCoord, color)
+    board.current = playMove(board.current, flatten([xCoord, yCoord]), color.current)
+    sendMove(board.current)
+    drawStone(canvasRef, xCoord, yCoord, color.current === "X" ? "black" : "white")
   })
 }

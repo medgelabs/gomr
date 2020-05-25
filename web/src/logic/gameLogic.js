@@ -2,9 +2,6 @@ import { config } from "../config"
 
 const numCells = config.numCells
 
-// initialize board to be all dots
-var board = ".".repeat(Math.pow(numCells, 2))
-
 /*
  * Convert cartesian coordinates into flattened coordinates
  *
@@ -131,7 +128,7 @@ const bulkPlaceStones = (color, board, stones) => {
     newBoard[flatStone] = color
   })
 
-  return newBoard
+  return newBoard.join("")
 }
 
 /*

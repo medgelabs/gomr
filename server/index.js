@@ -75,8 +75,9 @@ wss.on("connection", (sock, _) => {
         // send start game message
         room.player1.send(
           JSON.stringify({
-            color: "black",
-            boardState: room.boardState,
+            color: "X",
+            boardState: ".".repeat(361),
+            playerId: "player1"
           })
         );
         console.log("starting game");
@@ -102,7 +103,7 @@ wss.on("connection", (sock, _) => {
         console.error(`Invalid play. Room ${data.roomId} does not exist`);
       }
 
-      room.boardState.push(data.move);
+      // room.boardState.push(data.move);
 
       /**
        * sendMessage to client
@@ -122,15 +123,17 @@ wss.on("connection", (sock, _) => {
         room.player2.send(
           JSON.stringify({
             // send message to player2
-            boardState: room.boardState,
-            color: "white",
+            boardState: data.move,
+            color: "O",
+            playerId: "player2"
           })
         );
       } else {
         room.player1.send(
           JSON.stringify({
-            boardState: room.boardState,
-            color: "black",
+            boardState: data.move,
+            color: "X",
+            playerId: "player1"
           })
         );
       }
