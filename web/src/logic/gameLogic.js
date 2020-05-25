@@ -161,3 +161,34 @@ const captureStones = (board, flatCoord) => {
     }
     return board;
 }
+
+const playMove = (board, flatCoord, color) => {
+
+    if (board[flatCoord] !== ' ') {
+        throw new Error('invalid move, cannot play on top of stone');
+    }
+
+    board = placeStone(color, board, flatCoord);
+
+    const oppColor = color === 'X' ? 'O' : 'X';
+    const oppStones = [];
+    const myStones = [];
+
+    getValidNeighbors(flatCoord).forEach((flatNeighbor) => {
+        if (board[flatNeighbor] === color) {
+            myStones.push(flatNeighbor);
+        } else if (board[flatNeighbor] === oppColor) {
+            oppStones.push(flatNeighbor);
+        }
+    })
+
+    oppStones.forEach((flatStone) => {
+        board = captureStones(board, flatStone);
+    })
+
+    myStones.forEach((flatStone) => {
+        board = captureStones(board, flatStone);
+    })
+
+    return board;
+}
