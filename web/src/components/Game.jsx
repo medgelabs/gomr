@@ -11,7 +11,7 @@ const Game = () => {
   const canvasWidth = config.numCells * config.cellSize + config.gutter
   const canvasHeight = config.numCells * config.cellSize + config.gutter
 
-  const [board, setBoard] = useState([])
+  const [board, setBoard] = useState(".".repeat(Math.pow(config.numCells, 2)))
   const [color, setColor] = useState("")
   const [playerId, setPlayerId] = useState("player1")
 
