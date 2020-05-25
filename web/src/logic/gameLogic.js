@@ -102,3 +102,62 @@ const findReached = (board, flattenedCoords) => {
         reached
     }
 }
+
+
+/*
+ * places a stone on the board by modifying the character that is there
+ *
+ * @param(color) {String} the color to place at the flatCoord
+ * @param(board) {String} the board on which to place the stone
+ * @param(flatCoord) {Number} the index to place the stone at
+ * @return {String} the board with the new stone placed at the specified
+ *      location
+ */
+const placeStone = (color, board, flatCoord) => {
+    
+    const newBoard = board.split("")[flatCoord] = color;
+    return newBoard.join("");
+}
+
+/*
+ * Consumes a color, a board, and a list of flattened coordinates
+ * and places the specified color at each of the locations specified
+ * in the array.
+ *
+ * @param(color) {String} the color to set at each location
+ * @param(board) {String} the board on which to set all of the colors
+ * @param(stones) {Array} the list of flattened coordinates to place stones at
+ */
+const bulkPlaceStones = (color, board, stones) => {
+    const newBoard = board.split("");
+    stones.forEach((flatStone) => { 
+        newBoard[flatStone] = color;
+    })
+
+    return newBoard;
+}
+
+/*
+ * Determines if it is necessary to capture stones by checking if 
+ * all of the neighbors on the outer boundary of the chain are the opposing
+ * teams color. If they are the opposing teams color then a bulk place is
+ * performed to replace the chain with empty space.
+ *
+ * @param(board) {String} the board to perform the capture algo on.
+ * @param(flatCoord) {Number} the starting point to check if any captures need
+ *      to happen.
+ * @return {String} a string representing the new board, and a set
+ *      containing the list of coordinates that were captured <if any>.
+ */
+const captureStones = (board, flatCoord) => {
+    const { chain, reached } = findReached(board, flatCoord);
+
+    const filtered = Array.from(reached).filter((flatReached) => 
+        board[flatReached] === ' ');
+
+    if (filtered.length === 0) {
+        board = bulkPlaceStones(' ', board, chain);
+        return board;
+    }
+    return board;
+}
