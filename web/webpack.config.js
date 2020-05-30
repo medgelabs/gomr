@@ -14,6 +14,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, "public"),
+    publicPath: '/',
     filename: "[name].[hash].bundle.js",
     sourceMapFilename: "[name].[hash].bundle.map"
   },

@@ -1,14 +1,14 @@
-import { drawStone, drawBoard } from "./drawUtils"
+import { drawStone, drawBoard, drawStones } from "./drawUtils"
 import { config } from "../config"
+import { unflatten, flatten, playMove } from "../logic/gameLogic"
 
-const gameLoop = (canvasRef, gameState, color, sendMove) => {
-  console.log(gameState)
+export const gameLoop = (canvasRef, board, color, sendMove) => {
   drawBoard(canvasRef)
-  gameState.forEach((element) => {
-    drawStone(canvasRef, element[0], element[1], element[2])
-  })
+
+  drawStones(canvasRef, board)
+
   canvasRef.current.addEventListener("mousemove", (event) => {
-    const rect = canvas.getBoundingClientRect()
+    const rect = canvasRef.current.getBoundingClientRect()
     let x = event.clientX - rect.left
     let y = event.clientY - rect.top
 
@@ -18,24 +18,22 @@ const gameLoop = (canvasRef, gameState, color, sendMove) => {
     const opacityWhite = "rgba(255, 255, 255, 0.5)"
 
     drawBoard(canvasRef)
-    drawStone(canvasRef, xCoord, yCoord, color === "black" ? opacityBlack : opacityWhite)
-    gameState.forEach((element) => {
-      drawStone(canvasRef, element[0], element[1], element[2])
-    })
+    drawStone(canvasRef, xCoord, yCoord, color.current === "X" ? opacityBlack : opacityWhite)
+    drawStones(canvasRef, board)
   })
 
-  canvas.addEventListener("mousedown", (event) => {
-    const rect = canvas.getBoundingClientRect()
+  canvasRef.current.addEventListener("mousedown", (event) => {
+    const rect = canvasRef.current.getBoundingClientRect()
     let x = event.clientX - rect.left
     let y = event.clientY - rect.top
 
     const xCoord = Math.round((x - config.padding - config.xOffset) / config.cellSize)
     const yCoord = Math.round((y - config.padding - config.yOffset) / config.cellSize)
 
-    gameState.push([xCoord, yCoord, color])
-    sendMove(gameState)
-    drawStone(canvasRef, xCoord, yCoord, color)
+    const move = [xCoord, yCoord, color.current]
+    console.log(move)
+    board.current = playMove(board.current, flatten([xCoord, yCoord]), color.current)
+    sendMove(board.current)
+    drawStone(canvasRef, xCoord, yCoord, color.current === "X" ? "black" : "white")
   })
 }
-
-export { gameLoop }
