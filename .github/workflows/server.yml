@@ -1,0 +1,28 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'server/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: ensure pem
+      run: |
+           echo ${secrets.AWSPEM} > ./gomr.pem
+           chmod 600 ./gomr.pem
+    - name: docker build
+      run:  |
+            docker build -t gomr-api .
+            docker save gomr-api -o gomr-api.tar
+            scp -i ./gomr.pem gomr-api.tar ec2-user@gomr-api.medgelabs.io:/home/ec2-user/gomr-api.tar
+            ssh -i ./gomr.pem ec2-user@gomr-api.medgelabs.io 'bash -s' < deploy.sh
+      working-directory: 'server/'
+    - name: remove pem
+      run: rm -f ./gomr.pem
