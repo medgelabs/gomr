@@ -6,3 +6,5 @@ RUN npm ci
 
 COPY index.js /usr/src/app/index.js
 CMD ["node", "index.js"]
+
+
