@@ -42,7 +42,7 @@ app.post("/game", (_, res) => {
       id: "player2",
       color: 'O',
     },
-    boardState: [],
+    boardState: ".".repeat(361),
     expiration,
   }
 
@@ -72,23 +72,32 @@ wss.on("connection", (sock, _) => {
     if (data.messageType === "joinRoom") {
       const room = rooms.get(data.roomId);
 
-      if (room && !room.player1.sock) {
+      if (!room) {
+        console.log(`Attempt to join invalid room: ${data.roomId}`)
+        sock.send(
+          JSON.stringify({
+            error: "Invalid room"
+          })
+        )
+        return
+      }
+
+      if (!room.player1.sock) {
         room.player1.sock = sock;
         console.log("first player");
-      } else if (room && room.player1.sock) {
+      } else if (room.player1.sock) {
         room.player2.sock = sock;
+
         // send start game message
         room.player1.sock.send(
           JSON.stringify({
-            boardState: ".".repeat(361),
+            boardState: room.boardState,
             playerId: room.player1.id,
             color: room.player1.color,
           })
         );
+
         console.log("starting game");
-      } else {
-        // no room found
-        console.log("No room found");
       }
 
       /**
