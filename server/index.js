@@ -35,22 +35,25 @@ app.post("/game", (_, res) => {
     player1: {
       sock: undefined,
       id: "player1",
-      color: 'X',
+      color: "X",
     },
     player2: {
       sock: undefined,
       id: "player2",
-      color: 'O',
+      color: "O",
     },
     boardState: ".".repeat(361),
     expiration,
-  }
+  };
 
+  room.currentTurn = room.player1.id;
   rooms.set(roomId, room);
 
   res.send({
     roomId,
     expiration,
+    player1: room.player1.id,
+    player2: room.player2.id,
   });
 });
 
@@ -73,31 +76,37 @@ wss.on("connection", (sock, _) => {
       const room = rooms.get(data.roomId);
 
       if (!room) {
-        console.log(`Attempt to join invalid room: ${data.roomId}`)
+        console.log(`Attempt to join invalid room: ${data.roomId}`);
         sock.send(
           JSON.stringify({
-            error: "Invalid room"
+            error: "Invalid room",
           })
-        )
-        return
+        );
+        return;
       }
 
       if (!room.player1.sock) {
         room.player1.sock = sock;
-        console.log("first player");
+        sock.send(
+          JSON.stringify({
+            messageType: "joined",
+            playerId: room.player1.id,
+            color: room.player1.color,
+            boardState: room.boardState,
+          })
+        )
+        console.log("Player 1 joined");
       } else if (room.player1.sock) {
         room.player2.sock = sock;
 
-        // send start game message
-        room.player1.sock.send(
+        sock.send(
           JSON.stringify({
+            messageType: "joined",
+            playerId: room.player2.id,
+            color: room.player2.color,
             boardState: room.boardState,
-            playerId: room.player1.id,
-            color: room.player1.color,
           })
-        );
-
-        console.log("starting game");
+        )
       }
 
       /**
@@ -110,7 +119,7 @@ wss.on("connection", (sock, _) => {
        * }
        */
     } else if (data.messageType === "play") {
-      console.log("received play: " + JSON.stringify(data));
+      // console.log("received play: " + JSON.stringify(data));
       const room = rooms.get(data.roomId);
 
       if (!room) {
@@ -118,38 +127,71 @@ wss.on("connection", (sock, _) => {
         return;
       }
 
-      /**
-       * sendMessage to client
-       * data {
-       *   boardState: [[x,y, color]]
-       *   color: 'white' | 'black'
-       * }
-       */
-      if (data.sender === "player1") {
-        console.log("sending to player 2");
-
-        if (!room.player2.sock) {
-          console.log("Player 2 hasn't joined yet. Holding response...")
-          return
-        }
-
-        room.player2.sock.send(
+      // If not your turn - reject play
+      if (room.currentTurn !== data.sender) {
+        sock.send(
           JSON.stringify({
-            // send message to player2
-            boardState: data.move,
-            playerId: room.player2.id,
-            color: room.player2.color,
+            error: "Not your turn",
+            boardState: room.boardState, // TODO not efficient
           })
         );
+        return;
+      }
+
+      // TODO how can we send individual plays instead?
+      room.boardState = data.move;
+
+      // Flip turn
+      if (data.sender == room.player1.id) {
+        room.currentTurn = room.player2.id;
+      } else if (data.sender == room.player2.id) {
+        room.currentTurn = room.player1.id;
       } else {
-        room.player1.sock.send(
-          JSON.stringify({
+        console.log(`Unknown player: ${data.sender}`);
+        return;
+      }
+
+      console.log(`Now player ${room.currentTurn}'s turn`)
+
+      // Send play to opposite player
+      if (data.sender === room.player1.id) {
+        sockSend(room.player2, {
+            messageType: "play",
+            playerId: room.player2.id,
+            color: room.player2.color,
             boardState: data.move,
-            playerId: room.player1.id,
-            color: room.player1.color,
+        })
+      } else if (data.sender == room.player2.id) {
+        sockSend(room.player1, {
+          messageType: "play",
+          playerId: room.player1.id,
+          color: room.player1.color,
+          boardState: data.move,
+        })
+      } else {
+        console.log(`Unknown sender: ${data.sender}`);
+        sock.send(
+          JSON.stringify({
+            error: "Who are you??",
           })
         );
       }
     }
   });
 });
+
+function sockSend(player, message) {
+  if (!player) {
+    console.error("Undefined player received. Typo somewhere?")
+    return; // TODO should crash
+  }
+
+  if (!player.sock) {
+    console.error(`${player.id}'s socket not connected. Can't send message: ${message}`)
+    return
+  }
+
+  player.sock.send(
+    JSON.stringify(message)
+  )
+}
