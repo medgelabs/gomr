@@ -9,11 +9,6 @@ const app = express();
 app.use(cors());
 app.options("*", cors());
 
-// POST /game creates a new game
-//   client making request is player1
-//   player2 joins with POST /join with joinKey
-//   Any spectators will simply GET /room/:roomId
-//
 /**
  * {
  *   id: UUID
@@ -35,13 +30,23 @@ app.post("/game", (_, res) => {
   const expiration = new Date();
   expiration.setDate(expiration.getDate() + 1); // JS date object automatically increments year/month appropriately.
 
-  rooms.set(roomId, {
+  const room = {
     id: roomId,
-    player1: undefined,
-    player2: undefined,
+    player1: {
+      sock: undefined,
+      id: "player1",
+      color: 'X',
+    },
+    player2: {
+      sock: undefined,
+      id: "player2",
+      color: 'O',
+    },
     boardState: [],
     expiration,
-  });
+  }
+
+  rooms.set(roomId, room);
 
   res.send({
     roomId,
@@ -67,17 +72,17 @@ wss.on("connection", (sock, _) => {
     if (data.messageType === "joinRoom") {
       const room = rooms.get(data.roomId);
 
-      if (room && !room.player1) {
-        room.player1 = sock;
+      if (room && !room.player1.sock) {
+        room.player1.sock = sock;
         console.log("first player");
-      } else if (room && room.player1) {
-        room.player2 = sock;
+      } else if (room && room.player1.sock) {
+        room.player2.sock = sock;
         // send start game message
-        room.player1.send(
+        room.player1.sock.send(
           JSON.stringify({
-            color: "X",
             boardState: ".".repeat(361),
-            playerId: "player1"
+            playerId: room.player1.id,
+            color: room.player1.color,
           })
         );
         console.log("starting game");
@@ -101,9 +106,8 @@ wss.on("connection", (sock, _) => {
 
       if (!room) {
         console.error(`Invalid play. Room ${data.roomId} does not exist`);
+        return;
       }
-
-      // room.boardState.push(data.move);
 
       /**
        * sendMessage to client
@@ -115,25 +119,25 @@ wss.on("connection", (sock, _) => {
       if (data.sender === "player1") {
         console.log("sending to player 2");
 
-        if (!room.player2) {
+        if (!room.player2.sock) {
           console.log("Player 2 hasn't joined yet. Holding response...")
           return
         }
 
-        room.player2.send(
+        room.player2.sock.send(
           JSON.stringify({
             // send message to player2
             boardState: data.move,
-            color: "O",
-            playerId: "player2"
+            playerId: room.player2.id,
+            color: room.player2.color,
           })
         );
       } else {
-        room.player1.send(
+        room.player1.sock.send(
           JSON.stringify({
             boardState: data.move,
-            color: "X",
-            playerId: "player1"
+            playerId: room.player1.id,
+            color: room.player1.color,
           })
         );
       }
