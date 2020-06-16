@@ -4,25 +4,22 @@ import { useParams } from "react-router-dom"
 import { config } from "../config"
 import "./Game.css"
 
-const serverUrl = "ws://localhost:8081/gomr"
-
 const Game = () => {
   const canvasRef = useRef(null)
   const canvasWidth = config.numCells * config.cellSize + config.gutter
   const canvasHeight = config.numCells * config.cellSize + config.gutter
 
-  //  const [board, setBoard] = useState(".".repeat(Math.pow(config.numCells, 2)))
+  let { roomId } = useParams()
   const board = useRef(".".repeat(Math.pow(config.numCells, 2)))
   const color = useRef("")
-  const playerId = useRef("player1")
+  const playerId = useRef("")
 
   // Init the game loop
   useEffect(() => {
     gameLoop(canvasRef, board, color, sendMove)
   })
 
-  let { roomId } = useParams()
-  const ws = new WebSocket(serverUrl)
+  const ws = new WebSocket(config.wsUrl)
 
   // sendMove([x, y, color])
   // modifying temporarily to send the whole board state back and forth
@@ -33,6 +30,7 @@ const Game = () => {
         roomId: roomId,
         move,
         sender: playerId.current,
+        color: color.current,
       })
     )
   }
@@ -44,11 +42,9 @@ const Game = () => {
       console.log(JSON.stringify(JSON.parse(message.data)))
       if (typeof message.data === "string") {
         const raw = JSON.parse(message.data)
-        // setBoard(raw.boardState)
         board.current = raw.boardState
         color.current = raw.color
         playerId.current = raw.playerId
-        // setPlayerId(raw.playerId)
       } else {
         console.log("Could not understand socket message")
       }

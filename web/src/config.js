@@ -6,4 +6,6 @@ export const config = {
   padding: 10,
   gutter: 50, // gutter around grid
   stoneRadius: 15,
+  serverUrl: "http://localhost:3000",
+  wsUrl: "ws://localhost:3000/gomr",
 }
