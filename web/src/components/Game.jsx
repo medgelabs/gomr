@@ -4,8 +4,6 @@ import { useParams } from "react-router-dom"
 import { config } from "../config"
 import "./Game.css"
 
-const serverUrl = "ws://localhost:8081/gomr"
-
 const Game = () => {
   const canvasRef = useRef(null)
   const canvasWidth = config.numCells * config.cellSize + config.gutter
@@ -21,7 +19,7 @@ const Game = () => {
     gameLoop(canvasRef, board, color, sendMove)
   })
 
-  const ws = new WebSocket(serverUrl)
+  const ws = new WebSocket(config.wsUrl)
 
   // sendMove([x, y, color])
   // modifying temporarily to send the whole board state back and forth

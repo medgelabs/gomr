@@ -1,6 +1,7 @@
 import React from "react"
 import axios from "axios"
 import { useHistory } from "react-router-dom"
+import { config } from "../config"
 import "./LandingPage.css"
 
 const LandingPage = () => {
@@ -8,7 +9,7 @@ const LandingPage = () => {
 
   const fetchGame = () => {
     axios
-      .post("http://localhost:3000/game")
+      .post(config.serverUrl + "/game")
       .then((success) => {
         console.log(success)
         history.push(`/game/${success.data.roomId}`)

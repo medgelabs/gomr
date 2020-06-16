@@ -2,8 +2,18 @@ const WebSocket = require("ws");
 const express = require("express");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
+const http = require("http");
 
+const port = process.env.SERVER_PORT || 3000;
+
+// Setup REST and WS servers
 const app = express();
+const server = http.createServer(app)
+const wss = new WebSocket.Server({
+  server: server,
+  path: "/gomr",
+});
+
 
 // setup cors to only accept origins from our app
 app.use(cors());
@@ -59,14 +69,8 @@ app.post("/game", (_, res) => {
 
 // app.get("/join/:roomId")
 
-app.listen(3000, () => console.log("listening on port 3000"));
 
-const wss = new WebSocket.Server({
-  port: 8081,
-  clientTracking: true,
-  path: "/gomr",
-});
-
+// WebSocket APIs
 wss.on("connection", (sock, _) => {
   sock.on("message", (raw) => {
     const data = JSON.parse(raw);
@@ -95,7 +99,7 @@ wss.on("connection", (sock, _) => {
             boardState: room.boardState,
           })
         )
-        console.log("Player 1 joined");
+        console.log("Player 1 joined " + data.roomId);
       } else if (room.player1.sock) {
         room.player2.sock = sock;
 
@@ -107,6 +111,7 @@ wss.on("connection", (sock, _) => {
             boardState: room.boardState,
           })
         )
+        console.log("Player 2 joined room " + data.roomId);
       }
 
       /**
@@ -195,3 +200,8 @@ function sockSend(player, message) {
     JSON.stringify(message)
   )
 }
+
+// Start the combo server
+server.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+})
