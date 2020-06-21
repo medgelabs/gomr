@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -9,14 +11,20 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var port = flag.String("port", "8080", "port to listen on")
+
 func main() {
+	flag.Parse()
 	store := NewStore()
 
 	router := http.NewServeMux()
+	router.HandleFunc("/game", gameHandler(*store))
 	router.HandleFunc("/game/", gameHandler(*store))
 	router.HandleFunc("/gomr", ws())
 
-	http.ListenAndServe("0.0.0.0:8080", router)
+	addr := fmt.Sprintf("0.0.0.0:%s", *port)
+	fmt.Printf("Server up on %s", addr)
+	http.ListenAndServe(addr, router)
 }
 
 func gameHandler(store Store) http.HandlerFunc {
@@ -25,12 +33,29 @@ func gameHandler(store Store) http.HandlerFunc {
 		case "POST":
 			createGame(store).ServeHTTP(w, r)
 		case "GET":
-			roomId := strings.TrimPrefix(r.URL.Path, "/game/")
-			room, _ := store.GetRoom(roomId)
-			json.NewEncoder(w).Encode(room)
+			getGame(store).ServeHTTP(w, r)
 		default:
 			w.WriteHeader(405)
 		}
+	}
+}
+
+func getGame(store Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		roomId := strings.TrimPrefix(r.URL.Path, "/game/")
+		if roomId == "" {
+			w.WriteHeader(404)
+			return
+		}
+
+		room, err := store.GetRoom(roomId)
+		if err != nil {
+			w.WriteHeader(404)
+			fmt.Printf("Error fetching room %s: %v", roomId, err)
+			return
+		}
+
+		json.NewEncoder(w).Encode(room)
 	}
 }
 
