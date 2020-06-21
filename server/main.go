@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/gorilla/websocket"
 )
 
@@ -17,27 +20,22 @@ func main() {
 	flag.Parse()
 	store := NewStore()
 
-	router := http.NewServeMux()
-	router.HandleFunc("/game", gameHandler(*store))
-	router.HandleFunc("/game/", gameHandler(*store))
-	router.HandleFunc("/gomr", ws())
+	router := chi.NewRouter()
+	router.Use(middleware.Logger)
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+	router.Get("/game", getGame(store))
+	router.Post("/game", createGame(store))
+	router.HandleFunc("/gomr", ws(store))
 
 	addr := fmt.Sprintf("0.0.0.0:%s", *port)
-	fmt.Printf("Server up on %s", addr)
+	log.Println("Server up on", addr)
 	http.ListenAndServe(addr, router)
-}
-
-func gameHandler(store Store) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "POST":
-			createGame(store).ServeHTTP(w, r)
-		case "GET":
-			getGame(store).ServeHTTP(w, r)
-		default:
-			w.WriteHeader(405)
-		}
-	}
 }
 
 func getGame(store Store) http.HandlerFunc {
@@ -51,7 +49,7 @@ func getGame(store Store) http.HandlerFunc {
 		room, err := store.GetRoom(roomId)
 		if err != nil {
 			w.WriteHeader(404)
-			fmt.Printf("Error fetching room %s: %v", roomId, err)
+			log.Println("Error fetching room:", roomId, err)
 			return
 		}
 
@@ -67,6 +65,7 @@ func createGame(store Store) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO accept size on request
 		room := NewRoom(strings.Repeat(".", 19*19))
 		store.AddRoom(*room)
 
@@ -81,8 +80,36 @@ func createGame(store Store) http.HandlerFunc {
 	}
 }
 
-func ws() http.HandlerFunc {
-	var upgrader = websocket.Upgrader{}
+// WS comm
+type wsRequest struct {
+	MessageType string `json:"messageType"`
+	RoomId      string `json:"roomId"`
+	boardState  string `json:"boardState"`
+}
+
+type wsError struct {
+	MessageType string `json:"messageType"`
+	Error       string `json:"error"`
+}
+
+func writeError(conn *websocket.Conn, message string) {
+	msg := wsError{
+		MessageType: "error",
+		Error:       message,
+	}
+
+	err := conn.WriteJSON(msg)
+	if err != nil {
+		// TODO what can we do with this?
+		log.Println("write:", err)
+	}
+}
+
+func ws(store Store) http.HandlerFunc {
+	var upgrader = websocket.Upgrader{
+		// TODO cors
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -94,16 +121,61 @@ func ws() http.HandlerFunc {
 
 		// Main ws loop
 		for {
-			mt, message, err := conn.ReadMessage()
+			var req wsRequest
+			err := conn.ReadJSON(&req)
 			if err != nil {
-				log.Println("read: ", err)
+				log.Println("ws read: ", err)
 				break
 			}
 
-			err = conn.WriteMessage(mt, message)
-			err = conn.WriteMessage(websocket.TextMessage, []byte(r.Host))
-			if err != nil {
-				log.Println("write: ", err)
+			switch req.MessageType {
+			case "joinRoom":
+				type joinResponse struct {
+					MessageType string `json:"messageType"`
+					PlayerId    string `json:"playerId"`
+					Color       string `json:"color"`
+					BoardState  string `json:"boardState"`
+				}
+
+				room, err := store.GetRoom(req.RoomId)
+				if err != nil {
+					writeError(conn, "Invalid room")
+					return
+				}
+
+				resp := joinResponse{
+					MessageType: "joined",
+					PlayerId:    room.Player1.Id,
+					Color:       room.Player2.Id,
+					BoardState:  room.BoardState,
+				}
+
+				if room.Player1.conn == nil {
+					room.JoinPlayer(room.Player1.Id, conn)
+					resp.PlayerId = room.Player1.Id
+					resp.Color = room.Player1.Color
+				} else if room.Player2.conn == nil {
+					room.JoinPlayer(room.Player1.Id, conn)
+					resp.PlayerId = room.Player2.Id
+					resp.Color = room.Player2.Color
+				} else {
+					// TODO spectating logic
+					resp.PlayerId = "spectator"
+					resp.Color = "-"
+				}
+
+				conn.WriteJSON(resp)
+
+			case "play":
+				_, err := store.GetRoom(req.RoomId)
+				if err != nil {
+					writeError(conn, "Invalid room")
+					return
+				}
+
+			default:
+				log.Println("Unknown message received:", req.MessageType)
+				writeError(conn, "Invalid message")
 			}
 		}
 
