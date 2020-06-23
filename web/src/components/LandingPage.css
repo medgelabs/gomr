@@ -1,21 +1,54 @@
+:root {
+  --bg: #efefef;
+  --button-bg: rgb(102, 51, 153);
+  --button-txt: #ffffff;
+  --text: #000000;
+  --border: #000000;
+  --landing-bg: #ffffff;
+  --shadow: #888;
+}
+
+body {
+  background-color: var(--bg);
+}
+
 main {
   margin: 2rem auto;
+  padding: 1rem;
   width: 550px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background-color: var(--landing-bg);
+  box-shadow: 5px 5px 5px var(--shadow);
+}
+
+section {
+  margin-bottom: 1rem;
+}
+
+hr {
+  margin: 2rem 0;
 }
 
 h1 {
-  color: #222;
+  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 button {
-  background: rebeccapurple;
+  background: var(--button-bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol";
   text-decoration: none;
   padding: 5px;
   border: none;
-  color: white;
+  color: var(--button-txt);
   font-size: 1.25rem;
+}
+
+section.join {
+  display: flex;
+  justify-content: center;
 }

@@ -17,12 +17,28 @@ const LandingPage = () => {
       .catch((err) => {
         console.log("could not create new game: " + err)
       })
+
+    // fetch(`${config.serverUrl}/game`, {method: 'POST'})
+    // .then(resp => resp.json())
+    // .then(data => history.push(`/game/${data.roomId}`))
+    // .catch(err => console.error("Failed to create new game", err))
   }
 
   return (
     <main>
       <h1>Welcome to GOMR</h1>
-      <button onClick={fetchGame}>Play Game!</button>
+
+      <section>
+        <button onClick={fetchGame}>Create Game</button>
+      </section>
+
+      <hr />
+
+      <h3>Join Game</h3>
+      <section className="join">
+        <input type="text" name="roomId" placeholder="Join Code"></input>
+        <button>Join Game</button>
+      </section>
     </main>
   )
 }
