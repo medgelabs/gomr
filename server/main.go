@@ -29,8 +29,9 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
-	router.Get("/game", getGame(store))
+	router.Get("/game/{roomId}", getGame(store))
 	router.Post("/game", createGame(store))
+	router.Post("/game/join", joinGame(store))
 	router.HandleFunc("/gomr", ws(store))
 
 	addr := fmt.Sprintf("0.0.0.0:%s", *port)
@@ -40,7 +41,9 @@ func main() {
 
 func getGame(store Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		roomId := strings.TrimPrefix(r.URL.Path, "/game/")
+		// roomId := strings.TrimPrefix(r.URL.Path, "/game/")
+		roomId := chi.URLParam(r, "roomId")
+
 		if roomId == "" {
 			w.WriteHeader(404)
 			return
@@ -80,6 +83,13 @@ func createGame(store Store) http.HandlerFunc {
 	}
 }
 
+// TODO upgrade connection here?
+func joinGame(store Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
+
 // WS comm
 type wsRequest struct {
 	MessageType string `json:"messageType"`
@@ -105,11 +115,12 @@ func writeError(conn *websocket.Conn, message string) {
 	}
 }
 
+var upgrader = websocket.Upgrader{
+	// TODO cors
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
 func ws(store Store) http.HandlerFunc {
-	var upgrader = websocket.Upgrader{
-		// TODO cors
-		CheckOrigin: func(r *http.Request) bool { return true },
-	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
