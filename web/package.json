@@ -34,7 +34,7 @@
     "html-loader": "^1.1.0",
     "html-webpack-plugin": "^4.3.0",
     "mini-css-extract-plugin": "^0.9.0",
-    "mocha": "8.0.1",
+    "mocha": "8.4.0",
     "prettier": "^2.0.5",
     "prettier-webpack-plugin": "^1.2.0",
     "prop-types": "^15.7.2",
